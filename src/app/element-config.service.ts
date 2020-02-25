@@ -20,7 +20,7 @@ export class ElementConfigService {
     holeMD: 1900,
     od: 13.375,
     startMD: 50,
-    endMD: 1900,
+    endMD: 1200,
     tocMD: 213
   };
 

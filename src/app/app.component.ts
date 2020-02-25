@@ -108,9 +108,9 @@ export class AppComponent implements OnChanges, AfterViewInit {
       const partOfCasing = contentGroup
         .append("path")
         .attr("d", lineGenerator(points))
-        .attr("stroke", "#9aa5b5")
+        .attr("stroke", "#303946")
         .attr("stroke-width", 2)
-        .attr("fill", "#9aa5b5");
+        .attr("fill", "#303946");
     });
   }
 
