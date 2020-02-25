@@ -8,6 +8,7 @@ import {
 import * as d3 from "d3";
 
 import { Point, ElementConfig } from "./model/index";
+import { ElementConfigService } from "./element-config.service";
 
 @Component({
   selector: "app-root",
@@ -18,31 +19,20 @@ export class AppComponent implements OnChanges, AfterViewInit {
   @ViewChild("sketch") private sketchContainer: ElementRef;
 
   margin = { top: 20, right: 50, bottom: 20, left: 50 };
+  config: ElementConfig;
 
-  openHoleConfig: ElementConfig = {
-    type: 9,
-    holeSize: 16,
-    holeMD: 590
-  };
-
-  // productionCasingConfig: ElementConfig = {
-  //   type: 6,
-  //   holeSize: 17.5,
-  //   holeMD: 1900,
-  //   od: 13.375,
-  //   startMD: 213,
-  //   endMD: 1900,
-  //   tocMD: 213
-  // };
+  constructor(private configService: ElementConfigService) {
+    this.config = this.configService.config;
+  }
 
   ngAfterViewInit() {
-    if (this.openHoleConfig) {
+    if (this.config) {
       this.createSketch();
     }
   }
 
   ngOnChanges() {
-    if (this.openHoleConfig) {
+    if (this.config) {
       this.createSketch();
     }
   }
@@ -55,14 +45,13 @@ export class AppComponent implements OnChanges, AfterViewInit {
     d3.select("svg").remove();
 
     const element = this.sketchContainer.nativeElement;
-    const config = this.openHoleConfig;
 
     const contentWidth =
       element.offsetWidth - this.margin.left - this.margin.right;
     const contentHeight =
       element.offsetHeight - this.margin.top - this.margin.bottom;
 
-    const { maxHoleSize, minMD, maxMD, prevMD } = this.calculateRanges(config);
+    const { maxHoleSize, minMD, maxMD, prevMD } = this.calculateRanges(this.config);
 
     const xScale = d3
       .scaleLinear()
@@ -83,7 +72,7 @@ export class AppComponent implements OnChanges, AfterViewInit {
     const holePoints = this.calculateOpenHolePoints(
       xScale,
       yScale,
-      config,
+      this.config,
       maxHoleSize,
       prevMD
     );
