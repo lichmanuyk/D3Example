@@ -88,6 +88,15 @@ export class AppComponent implements OnChanges, AfterViewInit {
     );
     this.drawHole(contentGroup, holePoints);
 
+    // CEMENT DRAWING
+    const cementPoints = this.calculateCementPoints(
+      xScale,
+      yScale,
+      this.config,
+      maxHoleSize
+    );
+    this.drawCement(contentGroup, holePoints);
+
     // CASING DRAWING
     const casingPoints = this.calculateCasingPoints(
       xScale,
@@ -98,7 +107,42 @@ export class AppComponent implements OnChanges, AfterViewInit {
     this.drawCasing(contentGroup, casingPoints);
   }
 
-  private drawCasing(contentGroup, casingPoints: Point[][]) {
+  private drawCement(contentGroup, cementPoints: Point[]): void {
+    const lineGenerator = d3
+      .line<Point>()
+      .x(point => point.x)
+      .y(point => point.y);
+
+    const holeContour = contentGroup
+      .append("path")
+      .attr("d", lineGenerator(cementPoints))
+      .attr("stroke", "#a0acbc")
+      .attr("stroke-width", 2)
+      .attr("fill", "#a0acbc");
+  }
+
+  private calculateCementPoints(
+    xScale: d3.ScaleLinear<number, number>,
+    yScale: d3.ScaleLinear<number, number>,
+    config: ElementConfig,
+    maxHoleSize: number
+  ): Point[] {
+    const leftX = xScale((maxHoleSize - config.holeSize) / 2);
+    const topY = yScale(config.tocMD);
+    const bottomY = yScale(config.holeMD);
+    const rightX = xScale(config.holeSize) + leftX;
+
+    const points = [
+      { x: leftX, y: topY },
+      { x: leftX, y: bottomY },
+      { x: rightX, y: bottomY },
+      { x: rightX, y: topY }
+    ];
+
+    return points;
+  }
+
+  private drawCasing(contentGroup, casingPoints: Point[][]): void {
     const lineGenerator = d3
       .line<Point>()
       .x(point => point.x)
@@ -125,7 +169,6 @@ export class AppComponent implements OnChanges, AfterViewInit {
     const bottomY = yScale(config.endMD);
     const rightX = xScale(config.od) + leftX;
     const holeSizeODDiff = xScale((config.holeSize - config.od) / 2);
-    console.log((config.holeSize - config.od) / 2);
 
     const leftPoints = [
       { x: leftX, y: topY },

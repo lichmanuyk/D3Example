@@ -19,8 +19,8 @@ export class ElementConfigService {
     holeSize: 17,
     holeMD: 1900,
     od: 13.375,
-    startMD: 50,
-    endMD: 1200,
+    startMD: 0,
+    endMD: 1900,
     tocMD: 213
   };
 
