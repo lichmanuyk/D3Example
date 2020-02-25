@@ -95,7 +95,7 @@ export class AppComponent implements OnChanges, AfterViewInit {
       this.config,
       maxHoleSize
     );
-    this.drawCement(contentGroup, holePoints);
+    this.drawCement(contentGroup, cementPoints);
 
     // CASING DRAWING
     const casingPoints = this.calculateCasingPoints(
