@@ -78,15 +78,6 @@ export class AppComponent implements OnChanges, AfterViewInit {
       .domain([minMD, maxMD])
       .range([0, contentHeight]);
 
-    // CASING DRAWING
-    const casingPoints = this.calculateCasingPoints(
-      xScale,
-      yScale,
-      this.config,
-      maxHoleSize
-    );
-    this.drawCasing(contentGroup, casingPoints);
-
     // HOLE DRAWING
     const holePoints = this.calculateHolePoints(
       xScale,
@@ -96,6 +87,15 @@ export class AppComponent implements OnChanges, AfterViewInit {
       prevMD
     );
     this.drawHole(contentGroup, holePoints);
+
+    // CASING DRAWING
+    const casingPoints = this.calculateCasingPoints(
+      xScale,
+      yScale,
+      this.config,
+      maxHoleSize
+    );
+    this.drawCasing(contentGroup, casingPoints);
   }
 
   private drawCasing(contentGroup, casingPoints: Point[][]) {
@@ -124,15 +124,23 @@ export class AppComponent implements OnChanges, AfterViewInit {
     const topY = yScale(config.startMD);
     const bottomY = yScale(config.endMD);
     const rightX = xScale(config.od) + leftX;
+    const holeSizeODDiff = xScale((config.holeSize - config.od) / 2);
+    console.log((config.holeSize - config.od) / 2);
 
     const leftPoints = [
       { x: leftX, y: topY },
-      { x: leftX, y: bottomY }
+      { x: leftX, y: bottomY },
+      { x: leftX - holeSizeODDiff, y: bottomY },
+      { x: leftX - holeSizeODDiff, y: bottomY - 3 },
+      { x: leftX, y: bottomY - 10 }
     ];
 
     const rightPoints = [
       { x: rightX, y: topY },
-      { x: rightX, y: bottomY }
+      { x: rightX, y: bottomY },
+      { x: rightX + holeSizeODDiff, y: bottomY },
+      { x: rightX + holeSizeODDiff, y: bottomY - 3 },
+      { x: rightX, y: bottomY - 10 }
     ];
 
     const points = [[...leftPoints], [...rightPoints]];
@@ -150,7 +158,7 @@ export class AppComponent implements OnChanges, AfterViewInit {
       .append("path")
       .attr("d", lineGenerator(holePoints))
       .attr("stroke", "#a0acbc")
-      .attr("stroke-width", 1)
+      .attr("stroke-width", 2)
       .attr("fill", "none");
   }
 
