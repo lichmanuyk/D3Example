@@ -18,7 +18,7 @@ import { ElementConfigService } from "./element-config.service";
 export class AppComponent implements OnChanges, AfterViewInit {
   @ViewChild("sketch") private sketchContainer: ElementRef;
 
-  margin = { top: 20, right: 50, bottom: 20, left: 50 };
+  margin = { top: 20, right: 20, bottom: 20, left: 20 };
   config: ElementConfig;
 
   constructor(private configService: ElementConfigService) {
@@ -46,12 +46,27 @@ export class AppComponent implements OnChanges, AfterViewInit {
 
     const element = this.sketchContainer.nativeElement;
 
+    const svg = d3
+      .select(element)
+      .append("svg")
+      .attr("width", element.offsetWidth)
+      .attr("height", element.offsetHeight);
+
+    const contentGroup = svg
+      .append("g")
+      .attr(
+        "transform",
+        "translate(" + this.margin.left + "," + this.margin.top + ")"
+      );
+
     const contentWidth =
       element.offsetWidth - this.margin.left - this.margin.right;
     const contentHeight =
       element.offsetHeight - this.margin.top - this.margin.bottom;
 
-    const { maxHoleSize, minMD, maxMD, prevMD } = this.calculateRanges(this.config);
+    const { maxHoleSize, minMD, maxMD, prevMD } = this.calculateRanges(
+      this.config
+    );
 
     const xScale = d3
       .scaleLinear()
@@ -63,36 +78,75 @@ export class AppComponent implements OnChanges, AfterViewInit {
       .domain([minMD, maxMD])
       .range([0, contentHeight]);
 
-    const svg = d3
-      .select(element)
-      .append("svg")
-      .attr("width", element.offsetWidth)
-      .attr("height", element.offsetHeight);
+    // CASING DRAWING
+    const casingPoints = this.calculateCasingPoints(
+      xScale,
+      yScale,
+      this.config,
+      maxHoleSize
+    );
+    this.drawCasing(contentGroup, casingPoints);
 
-    const holePoints = this.calculateOpenHolePoints(
+    // HOLE DRAWING
+    const holePoints = this.calculateHolePoints(
       xScale,
       yScale,
       this.config,
       maxHoleSize,
       prevMD
     );
-    this.drawHole(svg, holePoints);
+    this.drawHole(contentGroup, holePoints);
   }
 
-  private drawHole(svg, holePoints: Point[]) {
+  private drawCasing(contentGroup, casingPoints: Point[][]) {
     const lineGenerator = d3
       .line<Point>()
       .x(point => point.x)
       .y(point => point.y);
 
-    const g = svg
-      .append("g")
-      .attr(
-        "transform",
-        "translate(" + this.margin.left + "," + this.margin.top + ")"
-      );
+    casingPoints.forEach(points => {
+      const partOfCasing = contentGroup
+        .append("path")
+        .attr("d", lineGenerator(points))
+        .attr("stroke", "#9aa5b5")
+        .attr("stroke-width", 2)
+        .attr("fill", "#9aa5b5");
+    });
+  }
 
-    const lineGraph = g
+  private calculateCasingPoints(
+    xScale: d3.ScaleLinear<number, number>,
+    yScale: d3.ScaleLinear<number, number>,
+    config: ElementConfig,
+    maxHoleSize: number
+  ): Point[][] {
+    const leftX = xScale((maxHoleSize - config.od) / 2);
+    const topY = yScale(config.startMD);
+    const bottomY = yScale(config.endMD);
+    const rightX = xScale(config.od) + leftX;
+
+    const leftPoints = [
+      { x: leftX, y: topY },
+      { x: leftX, y: bottomY }
+    ];
+
+    const rightPoints = [
+      { x: rightX, y: topY },
+      { x: rightX, y: bottomY }
+    ];
+
+    const points = [[...leftPoints], [...rightPoints]];
+
+    return points;
+  }
+
+  private drawHole(contentGroup, holePoints: Point[]): void {
+    const lineGenerator = d3
+      .line<Point>()
+      .x(point => point.x)
+      .y(point => point.y);
+
+    const holeContour = contentGroup
       .append("path")
       .attr("d", lineGenerator(holePoints))
       .attr("stroke", "#a0acbc")
@@ -100,7 +154,7 @@ export class AppComponent implements OnChanges, AfterViewInit {
       .attr("fill", "none");
   }
 
-  private calculateOpenHolePoints(
+  private calculateHolePoints(
     xScale: d3.ScaleLinear<number, number>,
     yScale: d3.ScaleLinear<number, number>,
     config: ElementConfig,
@@ -129,7 +183,7 @@ export class AppComponent implements OnChanges, AfterViewInit {
     // TODO - we should find max MD
     const maxMD = config.holeMD;
     // TODO - we should find bottom MD of prev element
-    const prevMD = 200;
+    const prevMD = 0;
     // TODO - we should find min MD of all elements
     const minMD = prevMD;
 

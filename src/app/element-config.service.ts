@@ -16,10 +16,10 @@ export class ElementConfigService {
 
   private productionCasingConfig: ElementConfig = {
     type: 6,
-    holeSize: 17.5,
+    holeSize: 17,
     holeMD: 1900,
     od: 13.375,
-    startMD: 213,
+    startMD: 200,
     endMD: 1900,
     tocMD: 213
   };
@@ -27,14 +27,4 @@ export class ElementConfigService {
   constructor() {
     this.config = this.productionCasingConfig;
   }
-
-  // productionCasingConfig: ElementConfig = {
-  //   type: 6,
-  //   holeSize: 17.5,
-  //   holeMD: 1900,
-  //   od: 13.375,
-  //   startMD: 213,
-  //   endMD: 1900,
-  //   tocMD: 213
-  // };
 }
