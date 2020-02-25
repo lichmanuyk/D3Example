@@ -20,8 +20,8 @@ export class ElementConfigService {
     holeMD: 1900,
     od: 13.375,
     startMD: 0,
-    endMD: 1500,
-    tocMD: 553
+    endMD: 1900,
+    tocMD: 0
   };
 
   constructor() {

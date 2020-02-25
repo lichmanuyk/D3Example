@@ -52,6 +52,28 @@ export class AppComponent implements OnChanges, AfterViewInit {
       .attr("width", element.offsetWidth)
       .attr("height", element.offsetHeight);
 
+    const defs = svg.append("defs");
+
+    const gradient = defs
+      .append("linearGradient")
+      .attr("id", "casingFillGradient")
+      .attr("x1", "0%")
+      .attr("x2", "100%")
+      .attr("y1", "10%")
+      .attr("y2", "10%");
+
+    gradient
+      .append("stop")
+      .attr("class", "start")
+      .attr("offset", "0%")
+      .attr("stop-color", "#d4d4d4");
+
+    gradient
+      .append("stop")
+      .attr("class", "end")
+      .attr("offset", "60%")
+      .attr("stop-color", "white");
+
     const contentGroup = svg
       .append("g")
       .attr(
@@ -113,7 +135,7 @@ export class AppComponent implements OnChanges, AfterViewInit {
       .x(point => point.x)
       .y(point => point.y);
 
-    const holeContour = contentGroup
+    const cementContour = contentGroup
       .append("path")
       .attr("d", lineGenerator(cementPoints))
       .attr("stroke", "#a0acbc")
@@ -142,13 +164,25 @@ export class AppComponent implements OnChanges, AfterViewInit {
     return points;
   }
 
-  private drawCasing(contentGroup, casingPoints: Point[][]): void {
+  private drawCasing(
+    contentGroup,
+    casingPoints: { incision: Point[][]; casingFill: Point[] }
+  ): void {
     const lineGenerator = d3
       .line<Point>()
       .x(point => point.x)
       .y(point => point.y);
 
-    casingPoints.forEach(points => {
+    const casingFillPoints = casingPoints.casingFill;
+    const casingFill = contentGroup
+      .append("path")
+      .attr("d", lineGenerator(casingFillPoints))
+      .attr("stroke", "#fff")
+      .attr("stroke-width", 0)
+      .attr("fill", "url(#casingFillGradient)");
+
+    const incision = casingPoints.incision;
+    incision.forEach(points => {
       const partOfCasing = contentGroup
         .append("path")
         .attr("d", lineGenerator(points))
@@ -163,7 +197,7 @@ export class AppComponent implements OnChanges, AfterViewInit {
     yScale: d3.ScaleLinear<number, number>,
     config: ElementConfig,
     maxHoleSize: number
-  ): Point[][] {
+  ): { incision: Point[][]; casingFill: Point[] } {
     const leftX = xScale((maxHoleSize - config.od) / 2);
     const topY = yScale(config.startMD);
     const bottomY = yScale(config.endMD);
@@ -186,7 +220,17 @@ export class AppComponent implements OnChanges, AfterViewInit {
       { x: rightX, y: bottomY - 10 }
     ];
 
-    const points = [[...leftPoints], [...rightPoints]];
+    const casingFill = [
+      { x: leftX, y: topY },
+      { x: leftX, y: bottomY },
+      { x: rightX, y: bottomY },
+      { x: rightX, y: topY }
+    ];
+
+    const points = {
+      incision: [[...leftPoints], [...rightPoints]],
+      casingFill
+    };
 
     return points;
   }
